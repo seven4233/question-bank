@@ -15,5 +15,17 @@ export function getSortInfoAPI(bankId) {
 
 // 获取单选题列表
 export function getSingleListAPI(bankId) {
-  return hlRequest({ method: 'GET', url: `/qb/${bankId}/single` })
+  return hlRequest({ method: 'GET', url: `/qb/single` , params:{bankId}})
 }
+
+// 提交題目
+export function submitQuestionAPI(params) {
+    return hlRequest({ url: `/qb/finish`, method: 'POST', data: params })
+}
+
+// 获取已做题
+
+export function queryDoneQuestionAPI() {
+    return hlRequest({ url: `/qb/done`, method: 'GET' })
+}
+  

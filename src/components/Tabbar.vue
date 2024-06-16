@@ -19,11 +19,22 @@ watch(
   { immediate: true }
 );
 
+const showTabbar = (path)=>{
+  if(path==='/'){
+    return true
+  }else if(path==='/profile'){
+    return true
+  }else if(path === '/file')  {
+    return true
+  }
+  return false
+}
+console.log(route.path);
 
 </script>
 
 <template>
-  <van-tabbar v-model="active" v-show="$route.path !=='/login'">
+  <van-tabbar v-model="active" v-show="showTabbar($route.path)">
     <van-tabbar-item replace to="/" icon="wap-home-o">首页</van-tabbar-item>
     <van-tabbar-item icon="search">标签</van-tabbar-item>
     <van-tabbar-item icon="friends-o">标签</van-tabbar-item>
