@@ -1,40 +1,13 @@
 <script setup>
 import { useSingleStore } from '@/stores/bank/single';
-import {submitQuestionAPI} from '@/apis/bank'
 
+const bankId = 1
 const singleStore = useSingleStore()
 
-onMounted(() => {
-    // if(singleStore.singleList.length === 0){
-    singleStore.getSingleListAction()
-    // }
-
+onMounted(()=>{
+    singleStore.getSingleListAction(bankId)
 })
 
-
-const currentCardIndex = ref(0)
-const activeOption = ref()
-
-const showStatus = ref('')
-
-const itemClick =async (option, index) => {
-
-    singleStore.selectedAction(option)
-
-
-  let res =  await submitQuestionAPI({
-        sort:'单选题',
-        bankId: 1,
-        question_id: option.question_id,
-        option: option.label
-    })
-
-    console.log(res);
-}
-
-const nextClick = () => {
-    currentCardIndex.value++
-}
 
 const show = ref(false)
 
@@ -42,52 +15,77 @@ const dtkClick = () => {
     show.value = !show.value
 }
 
+const checked = ref(1)
+
+
+const  activeIcon = 'https://hualin-1314589919.cos.ap-beijing.myqcloud.com/static/jinggao.png'
+const  activeIcon_success = 'https://hualin-1314589919.cos.ap-beijing.myqcloud.com/static/correct.png'
+const  inactiveIcon =  'https://hualin-1314589919.cos.ap-beijing.myqcloud.com/static/eglass-circle.png'
+
+
+
 </script>
 
 <template>
-    <van-nav-bar title="单选题" />
 
-
-
-    <div id="single" class="single">
-        <!-- 题目区域 -->
-        <div v-if="singleStore.singleList?.length">
-            <template v-for="(item, index) in singleStore.singleList" :key="index">
-                <!-- 一题 -->
-                <div v-if="index === currentCardIndex" class="item " :id="index + ''">
-
-                    <div class="text-xl  mt-2">
-                        <span>【{{ index + 1 }}】{{ item.content }}</span>
-                    </div>
-                    <!-- 选项区 -->
-                    <div class="question-select">
-                        <div class="option-item van-haptics-feedback"
-                            :class="{ 'option-item-selected': option.selected === true }"
-                            v-for="(option, i) in item.options" :key="option.value" @click="itemClick(option, i)">
-                            <div class="label ">{{ option.label }}</div>
-                            <div class="content">{{ option.option_content }}</div>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <!-- 操作区(上下题切换，提交 -->
-            <div class="mt-10 text-center">
-                <van-space size="1rem">
-                    <van-button :disabled="currentCardIndex <= 0" type="primary"
-                        @click="currentCardIndex--">上一题</van-button>
-                    <van-button v-if="currentCardIndex < singleStore.singleList?.length" type="primary"
-                        @click="nextClick()">下一题</van-button>
-                    <van-button v-else type="primary" @click="handleSubmit">交卷</van-button>
-                </van-space>
+    <div id="header">
+        <div
+            style="display: flex; justify-content: space-between; height: 60px; margin: 0px 20px; border-bottom: 1px solid rgb(229, 229, 229);">
+            <div style="display: flex; align-items: center;">单选题</div>
+            <div style="display: flex; align-items: center;"><span
+                    style="color: rgb(28, 189, 123); font-size: 25px; font-weight: bold;">658</span>/<span>659</span>
             </div>
         </div>
+    </div>
 
-        <!-- 空状态 -->
-        <div v-else>
-            <van-empty description="已经没了" />
+
+    <div v-for="(item,index) in singleStore.singleList" :key="item.id" id="content" class="content index-cell" style="height: 542px;">
+
+        <h3 class="text-center p-4 font-bold text-xl">高压电工作业</h3>
+
+        <div class="" style="padding: 0px 10px 10px;">
+            【单选】{{index+1}}，<span>{{item.name}}</span></div>
+
+        <!-- 选项 -->
+
+
+        <van-radio-group v-model="item.your" checked-color="rgb(9,187,7)">
+
+            <van-radio v-for="(option, i) in item.options" class="m-2 mt-4" :name="option.value">
+
+                <template #icon="props">
+                    <img class="w-5 h-5" :src="props.checked ? (option.value===option.answer ? activeIcon_success: activeIcon) : inactiveIcon" />
+                </template>
+                <p>{{option.value}}、{{ option.label }}</p>
+            </van-radio>
+ 
+        </van-radio-group>
+
+
+
+
+
+        <div style="text-align: center;">
+            <button class="testbtn">上一题</button>
+            <button class="testbtn" style="background-color: rgb(28, 189, 123); color: rgb(255, 255, 255);">下一题</button>
+        </div>
+
+        <div style="height: 10px; background-color: rgb(245, 247, 246);"></div>
+
+        <div style="margin: 10px 0px 10px 10px;">
+            <p style="font-weight: bold; padding-bottom: 10px;">正确答案：<span style="color: rgb(28, 189, 123);">{{ item.answer }}</span>
+            </p>
+            <!-- 解析 -->
+            <div>
+                <p style="font-weight: bold; color: rgb(28, 189, 123);">I&nbsp;&nbsp;解析</p>
+                <div>{{ item.source }}</div>
+                <div style="text-align: right; padding: 20px;"><button
+                        style="height: 30px; width: 70px; font-size: 15px; background-color: rgb(28, 189, 123); border: 0px; color: rgb(255, 255, 255); border-radius: 5px;">交流互动</button>
+                </div>
+            </div>
         </div>
     </div>
+
 
     <van-tabbar safe-area-inset-bottom>
         <van-tabbar-item @click="dtkClick()" icon="records-o">答题卡</van-tabbar-item>
@@ -105,84 +103,24 @@ const dtkClick = () => {
 
         </div>
     </van-action-sheet>
-
-
 </template>
 
-<style lang="less" scoped>
-.single {
 
-    font-family: '黑体';
+<style scoped lang="less">
+.index-cell {
+    font-size: 16px;
+    margin-top: 0px;
+    overflow-y: scroll;
 
-    .question-select {
-        font-size: 18px;
-        margin: 5px 0;
-
-        .option-item {
-            display: flex;
-            height: 50px;
-            align-items: center;
-            margin-top: 10px;
-            padding-left: 15px;
-            border: 1px solid transparent;
-            border-radius: 1px;
-
-
-            &:first-child {
-                margin-top: 10px;
-            }
-
-            .label {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 20px;
-                height: 20px;
-                margin-right: 10px;
-                border: 1px solid;
-                border-radius: 50%;
-                border-color: rgb(221 221 221);
-            }
-
-            .content {
-                display: flex;
-                flex: 1 1 0%;
-                color: rgb(51 51 51);
-            }
-        }
-
-        .option-item-selected {
-            border: 1px solid rgb(148 227 201);
-            background-color: rgb(238 250 247);
-
-            .label {
-                border-color: rgb(50 202 153);
-                background-color: rgb(50 202 153);
-                color: rgb(255 255 255);
-            }
-        }
-
-        .option-item-error {
-            border-color: rgb(255 187 164);
-            background-color: rgb(255 246 243);
-
-            .label {
-                border-color: rgb(213, 59, 41);
-                background-color: rgb(238, 10, 10);
-                color: rgb(255 255 255);
-            }
-        }
-    }
-
-
-    // 答题卡颜色
-
-    .correct {
-        background-color: green;
-    }
-
-    .error {
-        background-color: red;
+    .testbtn {
+        height: 35px;
+        width: 100px;
+        margin: 20px;
+        background-color: #FFF;
+        border: 1px solid #1cbd7b;
+        color: #1cbd7b;
+        border-radius: 5px;
+        font-size: 14px;
     }
 }
 </style>
