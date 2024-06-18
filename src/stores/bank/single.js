@@ -1,22 +1,45 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { getSingleListAPI, submitQuestionAPI } from '@/apis/bank'
+import { addOneDoneQuestionAPI, getSingleListAPI, submitQuestionAPI , redoAPI} from '@/apis/bank'
 
 export const useSingleStore = defineStore(
   'single',
   () => {
-    const singleList = ref()
+    const singleList = ref([])
     const isSubmit = ref(false)
     const doneCount = ref(0)
     const totalCount = ref(0)
+    const lastPosition = ref(0)
+
     const getSingleListAction = async (bankId) => {
       //   获取单选题
       const res = await getSingleListAPI(bankId)
+
       console.log(res)
       singleList.value = res.list
       doneCount.value = res.doneCount
       totalCount.value = res.totalCount
+
+
+      for(let i = singleList.value.length - 1; i >0; i--){
+        if(singleList.value[i].your !== ''){
+           lastPosition.value = i
+           return
+        }else{
+          lastPosition.value = 0
+        }
+      }
     }
+
+    const redoAction = async(params)=>{
+      const res = await redoAPI(params)
+       await getSingleListAction(params.bank_id)
+       lastPosition.value = 0
+       location.reload()
+    }
+
+
+
 
     // 根据 选择情况 决定选项的状态
     const selectedAction = (selectedOption) => {
@@ -27,7 +50,7 @@ export const useSingleStore = defineStore(
       )
 
       // 单选题 先清空该题已选
-       targetQuestion.options.map((item) => {
+      targetQuestion.options.map((item) => {
         if (item.value !== value) {
           item.selected = false
         }
@@ -63,7 +86,7 @@ export const useSingleStore = defineStore(
 
     // 已做题目的索引
     const doneArr = computed(() => {
-      let doneArr= []
+      let doneArr = []
       const arr = selectedValue.value.filter((item) => item.selected)
       doneArr = arr.map((i) => i.question_index)
       return doneArr
@@ -90,6 +113,18 @@ export const useSingleStore = defineStore(
     )
 
 
+    /**
+ * 添加一题
+ */
+    const addOneDoneQuestion = async (params) => {
+      const res = await addOneDoneQuestionAPI(params)
+      console.log(res);
+
+      // 重新获取 进度
+      const r = await getSingleListAction(params.bank_id)
+
+    }
+
 
     /**
      * 添加完成題目
@@ -102,6 +137,7 @@ export const useSingleStore = defineStore(
       console.log(res)
     }
     return {
+      redoAction,
       addFinishedQuestion,
       correctList,
       doneCount,
@@ -115,6 +151,8 @@ export const useSingleStore = defineStore(
       leftQuestion,
       isSubmit,
       totalCount,
+      addOneDoneQuestion,
+      lastPosition
     }
   },
   {

@@ -1,8 +1,15 @@
 <script setup>
+import { useSingleStore } from '@/stores/bank/single';
 
 
+const bank_id = 1
+
+
+onMounted(()=>{
+    singleStore.getSingleListAction(bank_id)
+})
 const router = useRouter()
-
+const singleStore = useSingleStore()
 
 const itemClick = (item)=>{
     router.push('/single')
@@ -22,8 +29,8 @@ const itemClick = (item)=>{
             </div>
             <div class="sort_num">
                 已做
-                <span>{{ 22 }}</span>
-                /{{ 1111 }}题
+                <span>{{ singleStore.doneCount }}</span>
+                /{{ singleStore.totalCount }}题
             </div>
         </div>
 

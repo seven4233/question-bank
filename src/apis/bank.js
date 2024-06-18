@@ -18,6 +18,16 @@ export function getSingleListAPI(bankId) {
   return hlRequest({ method: 'GET', url: `/qb/${bankId}/single` })
 }
 
+// 提交一题
+export function addOneDoneQuestionAPI(params) {
+  return hlRequest({ url: `/qb/ok`, method: 'POST', data: params })
+}
+
+// 重做
+export function redoAPI(params) {
+  return hlRequest({ method: 'GET', url: `/qb/redo`, params })
+}
+
 // 提交題目
 export function submitQuestionAPI(params) {
     return hlRequest({ url: `/qb/finish`, method: 'POST', data: params })
